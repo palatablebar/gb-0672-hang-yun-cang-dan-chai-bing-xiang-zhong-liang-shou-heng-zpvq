@@ -1,0 +1,32 @@
+{
+  "keys": [
+    "intake",
+    "packaging",
+    "grouping",
+    "hazard",
+    "weight",
+    "reconcile",
+    "archive"
+  ],
+  "packages": {
+    "carton": "1",
+    "pallet": "10",
+    "箱": "1"
+  },
+  "hazards": [
+    "3",
+    "5.1",
+    "8"
+  ],
+  "incompatible": [
+    [
+      "3",
+      "5.1"
+    ]
+  ],
+  "declaration": {
+    "pieces": 240,
+    "net_kg": "2400",
+    "gross_kg": "2640"
+  }
+}

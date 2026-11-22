@@ -1,0 +1,23 @@
+:root {
+ --bg: #f3eee4;
+ --surface: #fffdf7;
+ --rail: #e5dccb;
+ --ink: #382f27;
+ --ink-muted: #8a7b69;
+ --line: #d2c5b4;
+ --line-strong: #bda286;
+ --accent: #ac642d;
+ --accent-ink: #fff8ec;
+ --ok: #3e7455;
+ --warn: #9d752a;
+ --bad: #ad4040;
+ --info: #577783;
+ --font-ui: "Songti SC", "STSong", serif;
+ --font-num: "Courier New", monospace;
+ --font-doc: Georgia, "Songti SC", serif;
+ --radius: 0px;
+ --row: 35px;
+ --pad: 19px;
+ --gap: 17px;
+ --shadow: none;
+}

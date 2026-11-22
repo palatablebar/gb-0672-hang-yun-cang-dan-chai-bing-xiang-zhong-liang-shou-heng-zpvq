@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="sheet-grid notice-grid">
+  <section class="panel index">
+    <h2>通知批次<sup>1</sup></h2>
+    <div class="branch">{{ sheet.batch_id }}</div>
+    <div class="toolbox">
+      <button id="demo-chain" class="mini">铺演示修订链</button>
+      <button id="publish-base" class="mini">发布当前舱单通知</button>
+      <select id="scenario-pick">
+        <option value="v2_weight">修订V2 M002毛重</option>
+        <option value="v3_relation">修订V3 M003拆并</option>
+        <option value="v4_fail">修订V4 发布失败</option>
+        <option value="v4_weight">V4同版重发</option>
+      </select>
+      <button id="publish-scenario" class="mini">按场景发布</button>
+    </div>
+  </section>
+
+  <section class="panel data-panel">
+    <h2>通知签收单<sup>2</sup><small>{{ sheet.rows|length }} 张主单</small></h2>
+    <div class="table-scroll">
+      <table id="signoff-table">
+        <thead><tr>
+          <th>提单编号</th><th>通知编号</th><th>适用版本</th><th>接收方</th>
+          <th>本次变化</th><th>当前依据</th><th>旧通知替代关系</th><th>签收状态</th><th>能否申报</th><th>操作</th>
+        </tr></thead>
+        <tbody>
+        {% for row in sheet.rows %}
+          <tr data-root="{{ row.id }}">
+            <td>{{ row.id }}</td><td>{{ row.notice_no or '—' }}</td><td class="num">{{ row.notice_version or '—' }}</td>
+            <td>{{ row.receiver }}</td><td>{{ row.change }}</td><td>{{ row.basis_notice or '无' }}</td>
+            <td class="replace-cell">{{ row.replaces }}</td><td class="signoff-cell">{{ row.signoff_status }}</td>
+            <td class="declare-cell {% if row.can_declare!='可申报' %}fail{% endif %}">{{ row.can_declare }}</td>
+            <td><button class="mini sign-one" data-root="{{ row.id }}" {% if not row.basis_notice %}disabled{% endif %}>签收</button></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="10">尚无成功发布的通知，先发布或铺演示修订链。</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="ruling">
+      <h3>签收裁决</h3>
+      {% if sheet.latest_notice %}
+      <div class="stamp" id="decision-stamp">{{ sheet.latest_notice.decision.mode }}</div>
+      <p id="decision-reason">{{ sheet.latest_notice.decision.reason }}</p>
+      <div class="toolbox">
+        <button id="sign-batch" class="mini">按裁决整批统一签收</button>
+        <button id="sign-affected" class="mini">受影响主单先行签收</button>
+      </div>
+      {% else %}
+      <div class="stamp">待发布</div><p>发布首版通知后形成裁决。</p>
+      {% endif %}
+      {% if sheet.failed_notice %}
+      <div class="stamp fail-stamp">发布失败 {{ sheet.failed_notice.notice_no }}</div>
+      <p>已恢复旧版依据，未送达记录保留；重试成功前不得发布新修订。</p>
+      <button id="retry-failed" class="mini" data-notice="{{ sheet.failed_notice.notice_no }}">重试失败通知</button>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="right-column">
+    <section class="panel">
+      <h2>通知版本链<sup>3</sup></h2>
+      <div id="notice-chain">
+      {% for n in sheet.notices %}
+        <div class="checkline">
+          <b>{{ n.notice_no }}</b>
+          <span class="state-tag {{ 'fail' if n.state=='发布失败' }}">{{ n.state }}</span>
+          <span>{{ n.kind }}</span>
+          <small>受影响 {{ n.affected|join('、') if n.affected else '无（整批重发）' }}</small>
+        </div>
+      {% else %}
+        <div class="checkline"><span>暂无通知。</span></div>
+      {% endfor %}
+      </div>
+    </section>
+    <section class="panel">
+      <h2>送达记录</h2>
+      <div id="delivery-log">
+      {% for n in sheet.notices %}{% for d in n.deliveries %}
+        <div class="checkline">
+          <b>{{ n.notice_no }}#{{ d.attempt }}</b>
+          <span class="state-tag {{ 'fail' if d.outcome!='已送达' }}">{{ d.outcome }}</span>
+          <small>{{ d.detail }}</small>
+        </div>
+      {% endfor %}{% else %}
+        <div class="checkline"><span>暂无送达记录。</span></div>
+      {% endfor %}
+      </div>
+    </section>
+    <section class="panel stamps">
+      <h2>规则口径</h2>
+      <p class="note">① 新修订改变拆并关系或件净毛重，旧通知对受影响主单失效，不得继续作为申报依据。</p>
+      <p class="note">② 同一通知重试只追加送达记录，不新增第二套签收。</p>
+      <p class="note">③ 发布失败恢复旧版并保留未送达记录；未受影响主单不强制重签。</p>
+    </section>
+  </div>
+</div>
+<script id="notice-context" type="application/json">{{ {'batch_id': sheet.batch_id} | tojson }}</script>
+{% endblock %}

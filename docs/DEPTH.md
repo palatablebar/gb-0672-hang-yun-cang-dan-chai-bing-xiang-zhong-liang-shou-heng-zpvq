@@ -13,11 +13,16 @@
 | M5 净毛重核验 | 执行并复核净毛重核验 | `POST /api/weight` | `app/modules/weight/rules.py` | `tests/test_weight.py` |
 | M6 报关对账 | 执行并复核报关对账 | `POST /api/reconcile` | `app/modules/reconcile/rules.py` | `tests/test_reconcile.py` |
 | M7 版本封存 | 执行并复核版本封存 | `POST /api/archive` | `app/modules/archive/rules.py` | `tests/test_archive.py` |
+| M8 通知签收 | 发布修订通知并逐张主单签收 | `POST /api/notice` | `app/modules/notice/rules.py` `app/modules/notice/service.py` | `tests/test_notice_rules.py` `tests/test_notice_service.py` |
 
 ## 陷阱登记
 
 | TRAP | 现象 | 朴素实现 | 本项目处理 | 处理位置 | 测试 |
 |---|---|---|---|---|---|
+| TRAP-22 | 整批重发逼未受影响主单重签 | 全量覆盖签收依据 | 以主单拆并子树指纹比对，仅受影响主单换依据，未受影响主单沿用旧通知 | `app/modules/notice/rules.py` | `tests/test_notice_rules.py::test_partial_affected_allows_early_signoff` |
+| TRAP-23 | 同通知重试产生第二套签收 | 每次送达都插签收行 | (批次,主单,依据通知) 唯一约束，重试幂等只追加送达记录 | `app/modules/notice/store.py` | `tests/test_notice_service.py::test_resend_is_idempotent_no_second_signoff` |
+| TRAP-24 | 发布失败后新版被当作当前依据 | 失败通知覆盖旧版 | 失败通知落库但状态为发布失败，current_basis 跳过，恢复旧版并保留未送达记录 | `app/modules/notice/service.py` | `tests/test_notice_service.py::test_publish_failure_keeps_old_basis_and_undelivered` |
+| TRAP-25 | 旧通知在关系/重量变化后仍被采信 | 不校验依据时效 | 关系指纹或件净毛重指纹变化即标记替代，失效签收不可申报，须按新依据重签 | `app/modules/notice/rules.py` | `tests/test_notice_service.py::test_old_signoff_blocked_once_basis_superseded` |
 | TRAP-01 | 旧编码回退 | 静默错算或证据丢失 | 以可复核规则显式处理 | `app/modules/intake/rules.py` | `tests/test_intake.py::test_legacy_source` |
 | TRAP-02 | BOM表头 | 静默错算或证据丢失 | 以可复核规则显式处理 | `app/modules/intake/rules.py` | `tests/test_intake.py::test_bom_source` |
 | TRAP-04 | 分段表头 | 静默错算或证据丢失 | 以可复核规则显式处理 | `app/modules/intake/rules.py` | `tests/test_intake.py::test_segment_header` |

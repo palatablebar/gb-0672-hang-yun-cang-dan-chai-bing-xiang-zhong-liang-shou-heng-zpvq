@@ -10,7 +10,8 @@
     "危险品检查",
     "净毛重核验",
     "报关对账",
-    "版本封存"
+    "版本封存",
+    "通知签收"
   ],
   "rule": "主提单与分提单拆并形成有向无环关系，件数和净毛重逐层守恒",
   "lane": "L3",
@@ -29,7 +30,8 @@
     "hazard",
     "weight",
     "reconcile",
-    "archive"
+    "archive",
+    "notice"
   ],
   "labels": {
     "id": "提单编号",
@@ -63,6 +65,18 @@
     "graph_errors": "关系错误",
     "weight_errors": "重量差异",
     "child": "子单号",
-    "classes": "危险类组合"
+    "classes": "危险类组合",
+    "notice_no": "通知编号",
+    "batch_id": "通知批次",
+    "notice_version": "适用版本",
+    "receiver": "接收方",
+    "change": "本次变化",
+    "basis_notice": "当前依据",
+    "replaces": "旧通知替代关系",
+    "can_declare": "能否申报",
+    "signoff_status": "签收状态",
+    "deliveries": "送达记录",
+    "decision": "签收裁决",
+    "state": "发布状态"
   }
 }
